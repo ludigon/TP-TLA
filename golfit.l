@@ -9,17 +9,17 @@ void yyerror(char *);
 %}
 
 %option noyywrap
-
+%option yylineno
 variable[a-zA-Z][a-zA-Z0-9]*
 
 %%
 "#"             {return INIT_INT;}
 "^"             {return INIT_STR;}
-"_"        {printf("ENCONTRE PRINT\n");return PRINT;}
-\"[a-zA-Z0-9 \n\t\_\#\=\+\-\*\/\%]*\"        {  yylval.str_lit = malloc(strlen(yytext) + 1);
+"_"             {return PRINT;}
+\"[a-zA-Z0-9 \t\_\#\=\+\-\*\/\%]*\"        {  yylval.str_lit = malloc(strlen(yytext) + 1);
                                                 strcpy(yylval.str_lit, yytext);
                                                 return STRING;}
-\-?[1-9][0-9]*  {yylval.number = atoi(yytext); return NUMBER;}
+[1-9][0-9]*  {yylval.number = atoi(yytext); return NUMBER;}
 "="             {return '=';}
 "+"             {yylval.ch = *yytext; return PLUS;}
 "-"             {yylval.ch = *yytext; return MINUS;}
@@ -30,5 +30,5 @@ variable[a-zA-Z][a-zA-Z0-9]*
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
 "\n"            {return NEW_LINE;}
 [ ]             {;}
-.               {ECHO;}
+.               {yyerror("Syntax Error: Unexpected character\n");}
 %%

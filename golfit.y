@@ -6,7 +6,7 @@
 #include "treeReductor.h"
 extern int yylineno;
 int yylex();
-void yyerror(tree_node **, char *);    
+void yyerror(tree_node **,const char *);    
 %}
 
 %union {
@@ -29,6 +29,7 @@ void yyerror(tree_node **, char *);
 %type <node> var_exp
 %type <node> num_exp
 %type <node> str_exp
+%type <node> single_var
 %type <node> instruction
 %type <node> initialization
 %type <node> declaration
@@ -41,15 +42,14 @@ void yyerror(tree_node **, char *);
 
 %start line_list
 %parse-param {tree_node ** code}
-%define parse.error verbose
 
 %%
 line_list:
-    block                               {$$ = (*(code) = generateTree($1));}
-    | line_list NEW_LINE block          {$$ = (*(code) = addTree($1, $3));}
+    block                                   {$$ = (*(code) = generateTree($1));}
+    | line_list NEW_LINE block              {$$ = (*(code) = addTree($1, $3));}
     ;
 block:
-    instruction                         {$$ = $1;}
+    instruction                             {$$ = $1;}
     ;
 
 instruction:
@@ -68,35 +68,51 @@ expr:
     | str_exp                               {$$ = $1;}
 
 initialization:
-    INIT_INT var_exp '=' num_exp     {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
-    | INIT_INT var_exp '=' var_exp   {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
-    | INIT_STR var_exp '=' str_exp   {$$ = (node_t*)createInitializeNode($2, $4, STR_VAR);}
-    | INIT_STR var_exp '=' var_exp   {$$ = (node_t*)createInitializeNode($2, $4, STR_VAR);}
+    INIT_INT single_var '=' num_exp         {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
+    | INIT_INT single_var '=' var_exp       {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
+    | INIT_STR single_var '=' str_exp       {$$ = (node_t*)createInitializeNode($2, $4, STR_VAR);}
+    | INIT_STR single_var '=' var_exp       {$$ = (node_t*)createInitializeNode($2, $4, STR_VAR);}
     ;
 declaration:
-    INIT_INT var_exp               {$$ = (node_t*)createInitializeNode($2, (node_t*)createConstantNode(0), INT_VAR);}
+    INIT_INT single_var                     {$$ = (node_t*)createInitializeNode($2, (node_t*)createConstantNode(0), INT_VAR);}
     ;
+single_var:
+    VARIABLE                                {$$ = (node_t*)createVariableNode($1);}
 var_exp:
-    VARIABLE                            {$$ = (node_t*)createVariableNode($1);}
+    single_var                              {$$ = $1;}
+    | var_exp PLUS var_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp PLUS num_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp PLUS var_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp MINUS var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp MINUS num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp MINUS var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp TIMES var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp TIMES num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp TIMES var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp DIVIDED_BY var_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | var_exp DIVIDED_BY num_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp DIVIDED_BY var_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | '(' var_exp ')'                       {$$ = $2;}
     ;
 str_exp:
-    STRING                            {$$ = (node_t*)createStringNode($1);}
+    STRING                                  {$$ = (node_t*)createStringNode($1);}
     ;
 
 num_exp:
-    NUMBER                              {$$ = (node_t*)createConstantNode($1);}
-    | num_exp PLUS num_exp              {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp MINUS num_exp             {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp TIMES num_exp             {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp DIVIDED_BY num_exp        {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp REMAINDER num_exp         {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | '(' num_exp ')'                   {$$ = $2;}
-    ;
+    NUMBER                                  {$$ = (node_t*)createConstantNode($1);}
+    | MINUS NUMBER                          {$$ = (node_t*)createConstantNode($2 * -1);}
+    | num_exp PLUS num_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp MINUS num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp TIMES num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp DIVIDED_BY num_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp REMAINDER num_exp             {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | '(' num_exp ')'                       {$$ = $2;}
+    ;                               
 
 
 %%
-void yyerror(tree_node ** code, char * msg) {
-    fprintf(stderr, msg);
+void yyerror(tree_node ** code,const char * msg) {
+    fprintf(stderr, "Line %d: %s", yylineno, msg);
     exit(1);
 }
 

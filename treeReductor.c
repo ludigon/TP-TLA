@@ -3,28 +3,27 @@
 #include <string.h>
 #include "nodeGen.h"
 #include "nodes.h"
+#include "treeReductor.h"
+
 #define MAX_NUM_LEN 25
 #define MAX_VARIABLES 200
+#define MAX_ERROR_MSG_LEN 1000
+
+extern void yyerror(const char *);
+extern int yylineno;
+
 char * reduceInitializeNode(node_t * node);
 char * reduceVariableNode(node_t * node);
 char * reduceConstantNode(node_t * node);
 char * reduceOperationNode(node_t * node);
 char * reduceStringNode(node_t * node);
 char * reducePrintNode(node_t * node);
+
 char * get_prefix(var_t var_type);
-
 char * print_str(node_t *);
-
 int variableExists(char *);
 void saveVariable(char * name, var_t var_type);
 var_t getVarType(char * name);
-
-typedef char*(*reduceFunction)(node_t*);
-
-typedef struct var_record {
-    char * name;
-    var_t var_type;
-} var_record;
 
 static reduceFunction reducers[] = {
     reduceConstantNode,
@@ -63,11 +62,11 @@ char * reduceInitializeNode(node_t * node) {
     if (new_node->value->type == VARIABLE_NODE) {
         variable_node * var = (variable_node*)new_node->value;
         if (!variableExists(var->name)) {
-            printf("ERROR: Undeclared variable \"%s\"\n", var->name);
+            printf("Line %d -> ERROR: Undeclared variable \"%s\"\n", yylineno, var->name);
             exit(1);
         }
         if (getVarType(var->name) != new_node->var_type) {
-            printf("ERROR: Cannot assign value from one variable type to another\n");
+            yyerror("ERROR: Cannot assign value from one variable type to another\n");
             exit(1);
         }
     }
