@@ -3,10 +3,11 @@
 #include "nodes.h"
 #include "nodeGen.h"
 
-initialize_node * createInitializeNode(node_t * var, node_t * value) {
+initialize_node * createInitializeNode(node_t * var, node_t * value, var_t var_type) {
     initialize_node * node = malloc(sizeof(initialize_node));
     node->type = INITIALIZE_NODE;
     node->var =  var;
+    node->var_type = var_type;
     node->value = value;
     return node;
 }
@@ -32,6 +33,14 @@ operation_node * createOperationNode(node_t * op1, char operator, node_t * op2) 
     node->op1 = op1;
     node->operator = operator;
     node->op2 = op2;
+    return node;
+}
+
+string_node * createStringNode(char * str) {
+    string_node * node = malloc(sizeof(string_node));
+    node->type = STRING_NODE;
+    node->str = malloc(strlen(str) * sizeof(char) + 1);
+    strcpy(node->str, str);
     return node;
 }
 
