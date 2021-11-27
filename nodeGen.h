@@ -10,7 +10,7 @@ typedef struct tree_node {
 initialize_node * createInitializeNode(node_t * var, node_t * value, var_t var_type);
 variable_node * createVariableNode(const char * name);
 constant_node * createConstantNode(const int value);
-operation_node * createOperationNode(node_t * op1, char operator, node_t * op2);
+operation_node * createOperationNode(node_t * op1, char * operator, node_t * op2);
 string_node * createStringNode(char * str);
 print_node * createPrintNode(node_t * value);
 

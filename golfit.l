@@ -21,11 +21,15 @@ variable[a-zA-Z][a-zA-Z0-9]*
                                                 return STRING;}
 [1-9][0-9]*  {yylval.number = atoi(yytext); return NUMBER;}
 "="             {return '=';}
-"+"             {yylval.ch = *yytext; return PLUS;}
-"-"             {yylval.ch = *yytext; return MINUS;}
-"*"             {yylval.ch = *yytext; return TIMES;}
-"/"             {yylval.ch = *yytext; return DIVIDED_BY;}
-"%"             {yylval.ch = *yytext; return REMAINDER;}
+"+"             {return PLUS;}
+"-"             {return MINUS;}
+"*"             {return TIMES;}
+"/"             {return DIVIDED_BY;}
+"<"             {return LESS_THAN;}
+"<="            {return LESS_EQUAL_THAN;}
+">"             {return GREATER_THAN;}
+">="            {return GREATER_EQUAL_THAN;}
+"%"             {return REMAINDER;}
 [\(\)]          {return yytext[0];}
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
 "\n"            {return NEW_LINE;}

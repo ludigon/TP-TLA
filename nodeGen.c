@@ -28,7 +28,7 @@ constant_node * createConstantNode(const int value) {
     return node;
 }
 
-operation_node * createOperationNode(node_t * op1, char operator, node_t * op2) {
+operation_node * createOperationNode(node_t * op1, char * operator, node_t * op2) {
     operation_node * node = malloc(sizeof(operation_node));
     node->type = OPERATION_NODE;
     node->op1 = op1;

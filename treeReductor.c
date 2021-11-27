@@ -21,6 +21,7 @@ char * reducePrintNode(node_t * node);
 
 char * get_prefix(var_t var_type);
 char * print_str(node_t *);
+char * computeBinaryOperation(int op1, int op2, char * operator);
 int variableExists(char *);
 void saveVariable(char * name, var_t var_type);
 var_t getVarType(char * name);
@@ -112,16 +113,19 @@ char * reduceConstantNode(node_t * node) {
 }
 
 char * reduceOperationNode(node_t * node) {
+    //Chequeamos que sea del tipo
     if (node->type != OPERATION_NODE) {
         printf("ERROR: INCORRECT NODE TYPE. EXPECTED OPERATION_NODE");
         exit(1);
     }
+    //Casteo y obtengo los strings de cada caso
     operation_node * new_node = (operation_node*)node;
     char * first = exec(new_node->op1);
     char * second = exec(new_node->op2);
     // flags que me indican si los operandos son variables
     int var1 = 0;
     int var2 = 0;
+    //Si algun operando es variable, me fijo que la variable este definida y que sean del mismo tipo
     if (new_node->op1->type == VARIABLE_NODE) {
         variable_node * op1 = (variable_node *)new_node->op1;
         if (!variableExists(op1->name)) {
@@ -138,6 +142,7 @@ char * reduceOperationNode(node_t * node) {
         }
         var2 = 1;
     }
+
     if (var1 && var2) {
         variable_node * var1 = (variable_node*)new_node->op1;
         variable_node * var2 = (variable_node*)new_node->op2;
@@ -148,8 +153,17 @@ char * reduceOperationNode(node_t * node) {
             exit(1);
         }
     }
-    char * result = malloc((strlen(first) + 6 + strlen(second))*sizeof(char));
-    sprintf(result, "(%s %c %s)", first, new_node->operator, second);
+
+    char * result;
+    //por ultimo, si ambos operandos son numeros, hago la reduccion de la cuenta (2+2) -> 4
+    if (new_node->op1->type == CONSTANT_NODE && new_node->op2->type == CONSTANT_NODE) {
+        constant_node * node1 = (constant_node*)new_node->op1;
+        constant_node * node2 = (constant_node*)new_node->op2;
+        result = computeBinaryOperation(node1->number, node2->number, new_node->operator);
+    } else {
+        result = malloc((strlen(first) + 3 + strlen(second) + strlen(new_node->operator))*sizeof(char));
+        sprintf(result, "(%s%s%s)", first, new_node->operator, second);
+    }
     free(first);
     free(second);
     return(result);
@@ -251,4 +265,42 @@ char * print_str(node_t * node) {
     sprintf(result, "%s%s%s", prefix,string,suffix);
     free(string);
     return result;
+}
+
+//Esto puede mejorar
+char * computeBinaryOperation(int op1, int op2, char * operator) {
+    char * answer = malloc(MAX_NUM_LEN);
+    int result;
+    if (strcmp(operator, "+") == 0) {
+        result = op1 + op2;
+    } else if (strcmp(operator, "-") == 0){
+        result = op1 - op2;
+    } else if (strcmp(operator, "*") == 0){
+        result = op1 * op2;
+    } else if (strcmp(operator, "/") == 0){
+        if (op2 == 0) {
+            printf("ERROR: Cannot divide by 0");
+            exit(1);
+        }
+        result = op1 / op2;
+    } else if (strcmp(operator, "\%") == 0){
+        if (op2 == 0) {
+            printf("ERROR: Cannot divide by 0");
+            exit(1);
+        }
+        result = op1 % op2;
+    } else if (strcmp(operator, ">") == 0){
+        result = op1 > op2;
+    } else if (strcmp(operator, ">=") == 0){
+        result = op1 >= op2;
+    } else if (strcmp(operator, "<") == 0){
+        result = op1 < op2;
+    } else if (strcmp(operator, "<=") == 0){
+        result = op1 <= op2;
+    } else {
+        printf("ERROR: invalid operator %s", operator);
+        exit(1);
+    }
+    sprintf(answer, "%d", result);
+    return answer;
 }

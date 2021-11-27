@@ -22,7 +22,8 @@ void yyerror(tree_node **,const char *);
 %token <str> VARIABLE
 %token <str_lit> STRING
 %token <number> NUMBER
-%token <ch> PLUS MINUS TIMES DIVIDED_BY REMAINDER
+%token <str> PLUS MINUS TIMES DIVIDED_BY REMAINDER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN
+
 
 %type <node> block
 %type <node> expr
@@ -37,6 +38,7 @@ void yyerror(tree_node **,const char *);
 
 %type <tree> line_list
 
+%left LESS_EQUAL_THAN LESS_THAN GREATER_EQUAL_THAN GREATER_THAN
 %left PLUS MINUS
 %left TIMES DIVIDED_BY REMAINDER
 
@@ -64,14 +66,11 @@ print_statement:
 
 expr:
     var_exp                                 {$$ = $1;}
-    | num_exp                               {$$ = $1;}
     | str_exp                               {$$ = $1;}
 
 initialization:
-    INIT_INT single_var '=' num_exp         {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
-    | INIT_INT single_var '=' var_exp       {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
+    INIT_INT single_var '=' var_exp         {$$ = (node_t*)createInitializeNode($2, $4, INT_VAR);}
     | INIT_STR single_var '=' str_exp       {$$ = (node_t*)createInitializeNode($2, $4, STR_VAR);}
-    | INIT_STR single_var '=' var_exp       {$$ = (node_t*)createInitializeNode($2, $4, STR_VAR);}
     ;
 declaration:
     INIT_INT single_var                     {$$ = (node_t*)createInitializeNode($2, (node_t*)createConstantNode(0), INT_VAR);}
@@ -80,18 +79,16 @@ single_var:
     VARIABLE                                {$$ = (node_t*)createVariableNode($1);}
 var_exp:
     single_var                              {$$ = $1;}
-    | var_exp PLUS var_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp PLUS num_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp PLUS var_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp MINUS var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp MINUS num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp MINUS var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp TIMES var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp TIMES num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp TIMES var_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp DIVIDED_BY var_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | var_exp DIVIDED_BY num_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp DIVIDED_BY var_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp                               {$$ = $1;}
+    | var_exp PLUS var_exp                  {$$ = (node_t*)createOperationNode($1, "+", $3);}
+    | var_exp MINUS var_exp                 {$$ = (node_t*)createOperationNode($1, "-", $3);}
+    | var_exp TIMES var_exp                 {$$ = (node_t*)createOperationNode($1, "*", $3);}
+    | var_exp DIVIDED_BY var_exp            {$$ = (node_t*)createOperationNode($1, "/", $3);}
+    | var_exp REMAINDER var_exp             {$$ = (node_t*)createOperationNode($1, "%", $3);}
+    | var_exp LESS_THAN var_exp             {$$ = (node_t*)createOperationNode($1, "<", $3);}
+    | var_exp LESS_EQUAL_THAN var_exp       {$$ = (node_t*)createOperationNode($1, "<=", $3);}
+    | var_exp GREATER_THAN var_exp          {$$ = (node_t*)createOperationNode($1, ">", $3);}
+    | var_exp GREATER_EQUAL_THAN var_exp    {$$ = (node_t*)createOperationNode($1, ">=", $3);}
     | '(' var_exp ')'                       {$$ = $2;}
     ;
 str_exp:
@@ -101,12 +98,6 @@ str_exp:
 num_exp:
     NUMBER                                  {$$ = (node_t*)createConstantNode($1);}
     | MINUS NUMBER                          {$$ = (node_t*)createConstantNode($2 * -1);}
-    | num_exp PLUS num_exp                  {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp MINUS num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp TIMES num_exp                 {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp DIVIDED_BY num_exp            {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | num_exp REMAINDER num_exp             {$$ = (node_t*)createOperationNode($1, $2, $3);}
-    | '(' num_exp ')'                       {$$ = $2;}
     ;                               
 
 

@@ -40,7 +40,7 @@ typedef struct operation_node {
     node_type type;
     node_t * op1;
     node_t * op2;
-    char operator;
+    char* operator;
 } operation_node;
 
 typedef struct string_node {
