@@ -39,7 +39,7 @@ assignment:
     ASSIGN_INT VARIABLE '=' NUMBER   {printf("int %s = %d;\n", $2, $4);}
     ;
 declaration:
-    ASSIGN_INT VARIABLE {printff("int %s", $2);}
+    ASSIGN_INT VARIABLE {printf("int %s", $2);}
 
 %%
 
