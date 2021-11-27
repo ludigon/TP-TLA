@@ -10,7 +10,11 @@ char * reduceVariableNode(node_t * node);
 char * reduceConstantNode(node_t * node);
 char * reduceOperationNode(node_t * node);
 char * reduceStringNode(node_t * node);
+char * reducePrintNode(node_t * node);
 char * get_prefix(var_t var_type);
+
+char * print_str(node_t *);
+
 int variableExists(char *);
 void saveVariable(char * name, var_t var_type);
 var_t getVarType(char * name);
@@ -27,7 +31,8 @@ static reduceFunction reducers[] = {
     reduceVariableNode,
     reduceInitializeNode,
     reduceOperationNode,
-    reduceStringNode
+    reduceStringNode,
+    reducePrintNode
 };
 
 static var_record * variables[MAX_VARIABLES];
@@ -58,7 +63,11 @@ char * reduceInitializeNode(node_t * node) {
     if (new_node->value->type == VARIABLE_NODE) {
         variable_node * var = (variable_node*)new_node->value;
         if (!variableExists(var->name)) {
-            printf("ERROR: Undeclared variable \"%s\"", var->name);
+            printf("ERROR: Undeclared variable \"%s\"\n", var->name);
+            exit(1);
+        }
+        if (getVarType(var->name) != new_node->var_type) {
+            printf("ERROR: Cannot assign value from one variable type to another\n");
             exit(1);
         }
     }
@@ -153,9 +162,26 @@ char * reduceStringNode(node_t * node) {
         exit(1);
     }
     string_node * new_node = (string_node*)node;
-    char * result = malloc(strlen(new_node->str) * sizeof(char));
+    char * result = malloc(strlen(new_node->str) * sizeof(char) + 1);
     strcpy(result, new_node->str);
     return result;
+}
+
+char * reducePrintNode(node_t * node) {
+    if (node->type != PRINT_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED PRINT_NODE");
+        exit(1);
+    }
+    print_node * new_node = (print_node*)node;
+    if (new_node->value == NULL) {
+        printf("ERROR: Empty \"print\" statement");
+        exit(1);
+    }
+    switch (new_node->value->type) {
+        case STRING_NODE:
+            return print_str(new_node->value);
+    }
+    return NULL;
 }
 
 int variableExists(char * name) {
@@ -214,4 +240,16 @@ char * get_prefix(var_t var_type) {
         exit(1);
         break;
     }
+}
+
+char * print_str(node_t * node) {
+    string_node * new_node = (string_node*)node;
+    char * prefix = "printf(\"\%s\",";
+    char * string = exec((node_t*)new_node);
+
+    char * suffix = ");\n";
+    char * result = malloc(strlen(prefix) + strlen(string) + strlen(suffix) + 10);
+    sprintf(result, "%s%s%s", prefix,string,suffix);
+    free(string);
+    return result;
 }

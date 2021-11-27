@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "nodes.h"
 #include "nodeGen.h"
 
@@ -41,6 +42,13 @@ string_node * createStringNode(char * str) {
     node->type = STRING_NODE;
     node->str = malloc(strlen(str) * sizeof(char) + 1);
     strcpy(node->str, str);
+    return node;
+}
+
+print_node * createPrintNode(node_t * value) {
+    print_node * node = malloc(sizeof(print_node));
+    node->type = PRINT_NODE;
+    node->value = value;
     return node;
 }
 

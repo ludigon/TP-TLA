@@ -13,12 +13,12 @@ void yyerror(char *);
 variable[a-zA-Z][a-zA-Z0-9]*
 
 %%
+"#"             {return INIT_INT;}
+"^"             {return INIT_STR;}
+"_"        {printf("ENCONTRE PRINT\n");return PRINT;}
 \"[a-zA-Z0-9 \n\t\_\#\=\+\-\*\/\%]*\"        {  yylval.str_lit = malloc(strlen(yytext) + 1);
                                                 strcpy(yylval.str_lit, yytext);
                                                 return STRING;}
-"#"             {return INIT_INT;}
-"^"             {return INIT_STR;}
-"_"             {return PRINT;}
 \-?[1-9][0-9]*  {yylval.number = atoi(yytext); return NUMBER;}
 "="             {return '=';}
 "+"             {yylval.ch = *yytext; return PLUS;}
@@ -30,5 +30,5 @@ variable[a-zA-Z][a-zA-Z0-9]*
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
 "\n"            {return NEW_LINE;}
 [ ]             {;}
-.
+.               {ECHO;}
 %%

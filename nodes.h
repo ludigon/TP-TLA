@@ -6,7 +6,8 @@ typedef enum {
   VARIABLE_NODE,
   INITIALIZE_NODE,
   OPERATION_NODE,
-  STRING_NODE
+  STRING_NODE,
+  PRINT_NODE
 } node_type;
 
 typedef enum {
@@ -46,6 +47,12 @@ typedef struct string_node {
     node_type type;
     char * str;
 } string_node;
+
+typedef struct print_node {
+    node_type type;
+    node_t * value;
+} print_node;
+
 
 
 #endif
