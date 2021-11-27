@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "nodeGen.h"
+#include "nodes.h"
 #include "y.tab.h"
 void yyerror(char *);
 %}
@@ -11,12 +13,12 @@ void yyerror(char *);
 variable[a-zA-Z][a-zA-Z0-9]*
 
 %%
-"#"             {return ASSIGN_INT;}
+"#"             {return INIT_INT;}
 "_"             {return PRINT;}
 "="             {return '=';}
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
 [1-9][0-9]*     {yylval.number = atoi(yytext); return NUMBER;}
-"\n"            {;}
+"\n"            {return NEW_LINE;}
 [ ]             {;}
 .
 %%
