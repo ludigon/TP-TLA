@@ -12,6 +12,7 @@ void yyerror(tree_node **, char *);
 %union {
     char str[256];
     int number;
+    char ch;
     node_t * node;
     tree_node * tree;
 }
@@ -19,6 +20,7 @@ void yyerror(tree_node **, char *);
 %token PRINT INIT_INT NEW_LINE
 %token <str> VARIABLE
 %token <number> NUMBER
+%token <ch> PLUS MINUS TIMES DIVIDED_BY
 
 %type <node> block
 %type <node> var_exp
@@ -28,6 +30,9 @@ void yyerror(tree_node **, char *);
 %type <node> declaration
 
 %type <tree> line_list
+
+%left PLUS MINUS
+%left TIMES DIVIDED_BY
 
 %start line_list
 %parse-param {tree_node ** code}
@@ -43,6 +48,7 @@ block:
 
 instruction:
     initialization                          {$$ = $1;}
+    | declaration                           {$$ = $1;}
     ;
 
 print_statement:
@@ -51,11 +57,21 @@ initialization:
     INIT_INT var_exp '=' num_exp   {$$ = (node_t*)createInitializeNode($2, $4);}
     ;
 declaration:
+    INIT_INT var_exp               {$$ = (node_t*)createInitializeNode($2, (node_t*)createConstantNode(0));}
     ;
 var_exp:
     VARIABLE                            {$$ = (node_t*)createVariableNode($1);}
+    ;
 num_exp:
     NUMBER                              {$$ = (node_t*)createConstantNode($1);}
+    | VARIABLE                          {$$ = (node_t*)createVariableNode($1);}
+    | num_exp PLUS num_exp               {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp MINUS num_exp               {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp TIMES num_exp               {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | num_exp DIVIDED_BY num_exp               {$$ = (node_t*)createOperationNode($1, $2, $3);}
+    | '(' num_exp ')'                       {$$ = $2;}
+    ;
+
 
 %%
 void yyerror(tree_node ** code, char * msg) {
@@ -67,7 +83,7 @@ int main() {
     tree_node * cd;
     yyparse(&cd);
     while(cd != NULL) {
-        exec(cd->root);
+        printf("%s\n", exec(cd->root));
         cd = cd->next;
     }
     printf("TODO OK\n");

@@ -26,6 +26,15 @@ constant_node * createConstantNode(const int value) {
     return node;
 }
 
+operation_node * createOperationNode(node_t * op1, char operator, node_t * op2) {
+    operation_node * node = malloc(sizeof(operation_node));
+    node->type = OPERATION_NODE;
+    node->op1 = op1;
+    node->operator = operator;
+    node->op2 = op2;
+    return node;
+}
+
 tree_node * generateTree(node_t * root) {
     tree_node * tree = malloc(sizeof(node_t));
     tree->root = root;

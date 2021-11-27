@@ -8,8 +8,18 @@
 char * reduceInitializeNode(node_t * node);
 char * reduceVariableNode(node_t * node);
 char * reduceConstantNode(node_t * node);
+char * reduceOperationNode(node_t * node);
 int variableExists(char *);
 void saveVariable(char *);
+
+typedef char*(*reduceFunction)(node_t*);
+
+static reduceFunction reducers[] = {
+    reduceConstantNode,
+    reduceVariableNode,
+    reduceInitializeNode,
+    reduceOperationNode
+};
 
 static char * variables[MAX_VARIABLES];
 
@@ -19,15 +29,11 @@ void init_var_table() {
     }
 }
 
-void exec(node_t * root) {
-    switch (root->type)
-    {
-    case INITIALIZE_NODE:
-        printf("%s\n", reduceInitializeNode(root));
-        break;
-    default:
-        break;
+char * exec(node_t * root) {
+    if (root == NULL) {
+        return malloc(0);
     }
+    return reducers[root->type](root);
 }
 
 char * reduceInitializeNode(node_t * node) {
@@ -37,15 +43,27 @@ char * reduceInitializeNode(node_t * node) {
     }
     initialize_node * new_node = (initialize_node*)node;
     char * prefix = "int ";
-    char * name = reduceVariableNode(new_node->var);
+    char * name = exec(new_node->var);
+
+    // Chequeamos antes para evitar casos como int a = a;
+    if (new_node->value->type == VARIABLE_NODE) {
+        variable_node * var = (variable_node*)new_node->value;
+        if (!variableExists(var->name)) {
+            printf("ERROR: Undeclared variable \"%s\"", var->name);
+            exit(1);
+        }
+    }
+
+    
     if (variableExists(name)) {
         printf("ERROR: variable %s already exists!", name);
         exit(1);
     } else {
         saveVariable(name);
     }
+
     char * middle = "=";
-    char * value = reduceConstantNode(new_node->value);
+    char * value = exec(new_node->value);
 
     char * result = malloc((strlen(prefix) + strlen(name) + strlen(middle) + strlen(value) + 1) * sizeof(char));
     sprintf(result, "int %s = %s;", name, value);
@@ -76,6 +94,35 @@ char * reduceConstantNode(node_t * node) {
     return result;
 }
 
+char * reduceOperationNode(node_t * node) {
+    if (node->type != OPERATION_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED OPERATION_NODE");
+        exit(1);
+    }
+    operation_node * new_node = (operation_node*)node;
+    char * first = exec(new_node->op1);
+    char * second = exec(new_node->op2);
+    if (new_node->op1->type == VARIABLE_NODE) {
+        variable_node * op1 = (variable_node *)new_node->op1;
+        if (!variableExists(op1->name)) {
+            printf("ERROR: Undeclared variable \"%s\"", op1->name);
+            exit(1);
+        }
+    }
+    if (new_node->op2->type == VARIABLE_NODE) {
+        variable_node * op2 = (variable_node *)new_node->op2;
+        if (!variableExists(op2->name)) {
+            printf("ERROR: Undeclared variable \"%s\"", op2->name);
+            exit(1);
+        }
+    }
+    char * result = malloc((strlen(first) + 6 + strlen(second))*sizeof(char));
+    sprintf(result, "(%s %c %s)", first, new_node->operator, second);
+    free(first);
+    free(second);
+    return(result);
+}
+
 int variableExists(char * name) {
     int found = 0;
     int i;
@@ -102,5 +149,4 @@ void saveVariable(char * name) {
     }
     variables[i] = malloc(strlen(name) * sizeof(char));
     strcpy(variables[i], name);
-
 }

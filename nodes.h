@@ -4,7 +4,8 @@
 typedef enum {
   CONSTANT_NODE = 0,
   VARIABLE_NODE,
-  INITIALIZE_NODE
+  INITIALIZE_NODE,
+  OPERATION_NODE
 } node_type;
 
 typedef enum {
@@ -31,5 +32,13 @@ typedef struct initializeNode {
     node_t * var;
     node_t * value;
 } initialize_node;
+
+typedef struct operation_node {
+    node_type type;
+    node_t * op1;
+    node_t * op2;
+    char operator;
+} operation_node;
+
 
 #endif
