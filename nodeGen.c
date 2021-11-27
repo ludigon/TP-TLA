@@ -1,0 +1,43 @@
+#include <stdlib.h>
+#include <string.h>
+#include "nodes.h"
+#include "nodeGen.h"
+
+initialize_node * createInitializeNode(node_t * var, node_t * value) {
+    initialize_node * node = malloc(sizeof(initialize_node));
+    node->type = INITIALIZE_NODE;
+    node->var =  var;
+    node->value = value;
+    return node;
+}
+
+variable_node * createVariableNode(const char * name) {
+    variable_node * node = malloc(sizeof(variable_node));
+    node->type = VARIABLE_NODE;
+    node->name = malloc(strlen(name) * sizeof(char));
+    strcpy(node->name, name);
+    return node;
+}
+
+constant_node * createConstantNode(const int value) {
+    constant_node * node = malloc(sizeof(constant_node));
+    node->type = CONSTANT_NODE;
+    node->number = value;
+    return node;
+}
+
+tree_node * generateTree(node_t * root) {
+    tree_node * tree = malloc(sizeof(node_t));
+    tree->root = root;
+    tree->next = NULL;
+    return tree; 
+}
+
+tree_node * addTree(tree_node * current, node_t * root) {
+    tree_node * head = current;
+    while(current->next != NULL) {
+        current = current->next;
+    }
+    current->next = generateTree(root);
+    return head;
+}

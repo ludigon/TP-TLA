@@ -1,55 +1,75 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "nodes.h"
+#include "nodeGen.h"
+#include "treeReductor.h"
 extern int yylineno;
 int yylex();
-void yyerror(char *);    
+void yyerror(tree_node **, char *);    
 %}
 
 %union {
     char str[256];
     int number;
+    node_t * node;
+    tree_node * tree;
 }
 
-%token PRINT ASSIGN_INT NUMBER VARIABLE
-%type <str> VARIABLE;
-%type <number> NUMBER;
+%token PRINT INIT_INT NEW_LINE
+%token <str> VARIABLE
+%token <number> NUMBER
+
+%type <node> block
+%type <node> var_exp
+%type <node> num_exp
+%type <node> instruction
+%type <node> initialization
+%type <node> declaration
+
+%type <tree> line_list
+
 %start line_list
+%parse-param {tree_node ** code}
 
 %%
 line_list:
-    block
-    | line_list block
-
+    block                               {$$ = (*(code) = generateTree($1));}
+    | line_list NEW_LINE block          {$$ = (*(code) = addTree($1, $3));}
+    ;
 block:
-    instruction
+    instruction                         {$$ = $1;}
     ;
 
 instruction:
-    assignment
-    | declaration
-    | print_statement
+    initialization                          {$$ = $1;}
     ;
 
 print_statement:
-    PRINT NUMBER
-    | PRINT VARIABLE
     ;
-assignment:
-    ASSIGN_INT VARIABLE '=' NUMBER   {printf("int %s = %d;\n", $2, $4);}
+initialization:
+    INIT_INT var_exp '=' num_exp   {$$ = (node_t*)createInitializeNode($2, $4);}
     ;
 declaration:
-    ASSIGN_INT VARIABLE {printff("int %s", $2);}
+    ;
+var_exp:
+    VARIABLE                            {$$ = (node_t*)createVariableNode($1);}
+num_exp:
+    NUMBER                              {$$ = (node_t*)createConstantNode($1);}
 
 %%
-
-void yyerror(char * msg) {
+void yyerror(tree_node ** code, char * msg) {
     fprintf(stderr, msg);
     exit(1);
 }
 
 int main() {
-    yyparse();
+    tree_node * cd;
+    yyparse(&cd);
+    while(cd != NULL) {
+        exec(cd->root);
+        cd = cd->next;
+    }
     printf("TODO OK\n");
 }
 
