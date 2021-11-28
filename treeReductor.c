@@ -208,7 +208,7 @@ char * reduceInputNode(node_t * node) {
         print_error("Input can only be followed by an int variable", node->line);
     }
 	char * input_format = "scanf(\"%%d\", &%s);\n";
-	char * result = malloc(strlen(input_format) - 3 + 1);
+	char * result = malloc(strlen(input_format) + strlen(var->name) - 3 + 1);
 	sprintf(result, input_format, var->name);
 	return result;
 }
@@ -266,6 +266,7 @@ char * reduceIfNode(node_t * node) {
 		sprintf(result + if_size, else_format, else_block);
 	free(expression);
 	free(block);
+	free(else_block);
 	return result;
 }
 

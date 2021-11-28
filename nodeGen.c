@@ -62,6 +62,7 @@ string_node * createStringNode(char * str) {
     node->str = malloc(strlen(str) * sizeof(char) + 1);
     strcpy(node->str, str);
 
+    free(str);
     return node;
 }
 

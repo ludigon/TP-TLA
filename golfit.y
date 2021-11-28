@@ -156,7 +156,10 @@ int main() {
 			printf("%s\n", node);
 			free(node);
 		}
+        tree_node *aux = cd;
         cd = cd->next;
+        free(aux->root);
+        free(aux);
     }
     printf("}");
     //printf("TODO OK\n");
