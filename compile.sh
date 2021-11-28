@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./golfit | gcc -x c -o output -
+out=$(./golfit) && gcc -x c -g -o output - <<<"$out"
