@@ -53,6 +53,7 @@ void yyerror(tree_node **,const char *);
 line_list:
     block                                   {$$ = (*(code) = generateTree($1));}
     | line_list NEW_LINE block              {$$ = (*(code) = addTree($1, $3));}
+    | line_list NEW_LINE                    {$$ = (*(code) = addTree($1, NULL));}
     ;
 block:
     instruction                             {$$ = $1;}

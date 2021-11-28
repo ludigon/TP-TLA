@@ -72,6 +72,10 @@ tree_node * addTree(tree_node * current, node_t * root) {
     while(current->next != NULL) {
         current = current->next;
     }
-    current->next = generateTree(root);
+    if (root != NULL) {
+        current->next = generateTree(root);
+    } else {
+        current->next = NULL;
+    }
     return head;
 }
