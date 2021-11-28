@@ -3,4 +3,5 @@ lex.yy.c
 golfit
 
 a.out
+output
 *.o
