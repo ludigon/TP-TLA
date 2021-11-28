@@ -16,7 +16,7 @@ initialize_node * createInitializeNode(node_t * var, node_t * value, var_t var_t
 variable_node * createVariableNode(const char * name) {
     variable_node * node = malloc(sizeof(variable_node));
     node->type = VARIABLE_NODE;
-    node->name = malloc(strlen(name) * sizeof(char));
+    node->name = malloc(strlen(name) * sizeof(char) + 1);
     strcpy(node->name, name);
     return node;
 }
@@ -61,7 +61,7 @@ unary_operation_node * createUnaryOperationNode(node_t * op, char * operator) {
 }
 
 tree_node * generateTree(node_t * root) {
-    tree_node * tree = malloc(sizeof(node_t));
+    tree_node * tree = malloc(sizeof(tree_node));
     tree->root = root;
     tree->next = NULL;
     return tree; 

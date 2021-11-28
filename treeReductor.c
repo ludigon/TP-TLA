@@ -85,10 +85,10 @@ char * reduceInitializeNode(node_t * node) {
         saveVariable(name, new_node->var_type);
     }
 
-    char * middle = "=";
+    char * middle = " = ";
     char * value = exec(new_node->value);
 
-    char * result = malloc((strlen(prefix) + strlen(name) + strlen(middle) + strlen(value) + 1) * sizeof(char));
+    char * result = malloc((strlen(prefix) + strlen(name) + strlen(middle) + strlen(value) + 1 + 1) * sizeof(char));
     sprintf(result, "%s%s = %s;", prefix, name, value);
     free(name);
     free(value);
@@ -101,7 +101,7 @@ char * reduceVariableNode(node_t * node) {
         exit(1);
     }
     variable_node * new_node = (variable_node *)node;
-    char * result = malloc(strlen(new_node->name) * sizeof(char));
+    char * result = malloc(strlen(new_node->name) * sizeof(char) + 1);
     strcpy(result, new_node->name);
     return result;
 }
@@ -112,7 +112,7 @@ char * reduceConstantNode(node_t * node) {
         exit(1);
     }
     constant_node * new_node = (constant_node*)node;
-    char * result = malloc(MAX_NUM_LEN * sizeof(char));
+    char * result = malloc(MAX_NUM_LEN * sizeof(char) + 1);
     if (new_node->number >= 0) {
         sprintf(result, "%d", new_node->number);
     } else {

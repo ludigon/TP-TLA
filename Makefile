@@ -4,13 +4,15 @@ LEX_OUT=lex.yy.c
 SOURCES=$(shell find -iname "*.c" -not -name ${YACC_OUT} -not -name ${LEX_OUT}) ${YACC_OUT} ${LEX_OUT}
 BUILD_DIR=build
 OBJECTS=$(SOURCES:%.c=${BUILD_DIR}/%.o)
+CC=gcc
+CFLAGS=-g
 
 golfit: ${OBJECTS}
-	gcc -o $@ $^
+	$(CC) -o $@ $^ $(CFLAGS)
 
 ${BUILD_DIR}/%.o: %.c
 	mkdir -p ${BUILD_DIR}
-	gcc -c -o $@ $^
+	$(CC) -c -o $@ $^ $(CFLAGS)
 
 ${LEX_OUT}: golfit.l
 	lex $^
