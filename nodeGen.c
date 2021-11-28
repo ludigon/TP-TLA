@@ -28,8 +28,9 @@ variable_node * createVariableNode(const char * name) {
     variable_node * node = malloc(sizeof(variable_node));
     node->type = VARIABLE_NODE;
     node->line = yylineno-1;
-    node->name = malloc(strlen(name) * sizeof(char) + 1);
-    strcpy(node->name, name);
+    node->name = malloc(strlen(name) * sizeof(char) + 1 + strlen("golf_"));
+    sprintf(node->name, "golf_%s", name);
+    // strcpy(node->name, name);
 
     return node;
 }
