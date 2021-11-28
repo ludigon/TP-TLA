@@ -49,6 +49,9 @@ void yyerror(tree_node **,const char *);
 %left TIMES DIVIDED_BY REMAINDER
 %right NOT
 
+%nonassoc THEN
+%nonassoc ELSE
+
 %start line_list
 %parse-param {tree_node ** code}
 %define parse.error verbose
@@ -127,7 +130,7 @@ while:
 	;	
 
 if:
-	expr IF block 			    			{$$ = (node_t*)createIfNode($1, $3, NULL);}
+	expr IF block 		%prec THEN 			{$$ = (node_t*)createIfNode($1, $3, NULL);}
 	| expr IF block ELSE block 			    {$$ = (node_t*)createIfNode($1, $3, $5);}
 	;	
 
