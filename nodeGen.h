@@ -10,6 +10,7 @@ constant_node * createConstantNode(const int value);
 operation_node * createOperationNode(node_t * op1, char * operator, node_t * op2);
 string_node * createStringNode(char * str);
 print_node * createPrintNode(node_t * value);
+input_node * createInputNode(node_t * var);
 unary_operation_node * createUnaryOperationNode(node_t * op, char * operator);
 while_node * createWhileNode(node_t * expression, node_t * block);
 if_node * createIfNode(node_t * expression, node_t * block, node_t * else_block);

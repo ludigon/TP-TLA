@@ -20,6 +20,7 @@ char * reduceConstantNode(node_t * node);
 char * reduceOperationNode(node_t * node);
 char * reduceStringNode(node_t * node);
 char * reducePrintNode(node_t * node);
+char * reduceInputNode(node_t * node);
 char * reduceUnaryOperationNode(node_t * node);
 char * reduceWhileNode(node_t * node);
 char * reduceIfNode(node_t * node);
@@ -44,6 +45,7 @@ static reduceFunction reducers[] = {
     reduceOperationNode,
     reduceStringNode,
     reducePrintNode,
+    reduceInputNode,
     reduceUnaryOperationNode,
 	reduceWhileNode,
 	reduceIfNode,
@@ -191,6 +193,24 @@ char * reducePrintNode(node_t * node) {
 			print_error("Unable to print", node->line);
     }
     return NULL;
+}
+
+char * reduceInputNode(node_t * node) {
+    input_node * new_node = (input_node*)node;
+    if (new_node->var == NULL) {
+        print_error("Cannot input without variable", node->line);
+    }
+    if (new_node->var->type != VARIABLE_NODE) {
+        print_error("Input can only be followed by a variable", node->line);
+    }
+	variable_node * var = (variable_node *)new_node->var;
+    if (getVarType(var->name) != INT_VAR) {
+        print_error("Input can only be followed by an int variable", node->line);
+    }
+	char * input_format = "scanf(\"%%d\", &%s);\n";
+	char * result = malloc(strlen(input_format) - 3 + 1);
+	sprintf(result, input_format, var->name);
+	return result;
 }
 
 char * reduceUnaryOperationNode(node_t * node) {

@@ -48,6 +48,12 @@ typedef struct print_node {
     node_t * value;
 } print_node;
 
+typedef struct input_node {
+    node_type type;
+    int line;
+    node_t * var;
+} input_node;
+
 typedef struct unary_operation_node {
     node_type type;
     int line;

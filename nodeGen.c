@@ -73,6 +73,14 @@ print_node * createPrintNode(node_t * value) {
     return node;
 }
 
+input_node * createInputNode(node_t * var) {
+	input_node * node = malloc(sizeof(input_node));
+    node->type = INPUT_NODE;
+	node->line = yylineno-1;
+	node->var = var;
+	return node;
+}
+
 unary_operation_node * createUnaryOperationNode(node_t * op, char * operator) {
     unary_operation_node * node = malloc(sizeof(unary_operation_node));
     node->type = UNARY_OPERATION_NODE;

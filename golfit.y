@@ -18,7 +18,7 @@ void yyerror(tree_node **,const char *);
     tree_node * tree;
 }
 
-%token PRINT INIT_INT NEW_LINE INIT_STR
+%token INPUT PRINT INIT_INT NEW_LINE INIT_STR
 %token <str> VARIABLE
 %token <str_lit> STRING
 %token <number> NUMBER
@@ -36,6 +36,7 @@ void yyerror(tree_node **,const char *);
 %type <node> assignation
 %type <node> declaration
 %type <node> print_statement
+%type <node> input_statement
 %type <node> while
 %type <node> if
 
@@ -73,11 +74,16 @@ instruction:
     initialization                          {$$ = $1;}
     | declaration                           {$$ = $1;}
     | print_statement                       {$$ = $1;}
+    | input_statement                       {$$ = $1;}
     | assignation                           {$$ = $1;}
     ;
 
 print_statement:
     PRINT expr                              {$$ = (node_t*)createPrintNode($2);}
+    ;
+
+input_statement:
+    INPUT expr                              {$$ = (node_t*)createInputNode($2);}
     ;
 
 expr:
