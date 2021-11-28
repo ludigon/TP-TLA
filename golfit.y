@@ -114,7 +114,7 @@ num_exp:
     ;                               
 
 while:
-	WHILE expr block 					{$$ = (node_t*)createWhileNode($2, $3);}
+	WHILE expr NEW_LINE block 					{$$ = (node_t*)createWhileNode($2, $4);}
 	;	
 
 if:
