@@ -10,7 +10,7 @@
 ## Autores
  - Digon, Lucia - 59030
  - Lopez Guzman, Pedro Jeremias - 60711
- -  Sartorio, Alan Gabriel - 61379
+ - Sartorio, Alan Gabriel - 61379
 
 ---
 
@@ -43,22 +43,22 @@ El archivo de salida es `output`.
 
 Los programas de ejemplo se encuentran en la carpeta `examples`.
 
-Se pueden compilar a binario mediante las instrucciones previamente dadas: `./compile.sh < exmples/collatz.gol`.
+Se pueden compilar a binario mediante las instrucciones previamente dadas: `./compile.sh < examples/collatz.gol`.
 
 ### Collatz
-Pide como entrada un numero e imprime la orbita de la conjetura de Collatz empezando por ese numero.
+Pide como entrada un número e imprime la orbita de la conjetura de Collatz empezando por ese numero.
 
 ### Fibonacci
 Pide como entrada una cantidad N e imprime los primeros N numeros de la secuencia de Fibonacci.
 
 ### Guess
-Pide un numero por entrada estándar hasta que sea el mismo que haya sido definido previamente en el codigo.
+Pide un número por entrada estándar hasta que sea el mismo que haya sido definido previamente en el codigo.
 
 ### Prime
-Determina si un numero ingresado es primo o no.
+Determina si un número ingresado es primo o no.
 
 ### Primes
-Lista los N primeros numeros primos positivos. N se ingresa por entrada estandar.
+Lista los N primeros números primos positivos. N se ingresa por entrada estandar.
 
 ## Ideas y objetivos
 
@@ -82,7 +82,7 @@ Golf-IT soporta dos tipos de variables, enteras y strings. Se pueden declarar de
  - String:  
     ```^s="Hola Mundo!"```
 
-También permite declarar variables enteras sin inicializarlas y la asignación de variables. Por ejem
+También permite declarar variables enteras sin inicializarlas y la asignación de variables. Por ejemplo:
 ```
 #a
 #b=3
