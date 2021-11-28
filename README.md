@@ -35,7 +35,7 @@ Esto genera el ejecutable del compilador `golfit`.
 Genera .c por salida estándar.
 
 ### Compilacion de .gol a binario:
-`./compile.sh < programa.gol`
+```./compile.sh < programa.gol```
 
 El archivo de salida es `output`.
 
