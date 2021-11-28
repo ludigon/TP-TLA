@@ -18,7 +18,7 @@ ${LEX_OUT}: golfit.l
 	lex $^
 
 ${YACC_HEADER} ${YACC_OUT}: golfit.y
-	yacc -H $^
+	yacc -d $^
 
 clean:
 	rm -rf golfit build ${YACC_HEADER} ${YACC_OUT} ${LEX_OUT}
