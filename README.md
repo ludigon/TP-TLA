@@ -25,7 +25,7 @@ Genera .c por salida estándar.
 
 El archivo de salida es `output`.
 
-## Progrmas de ejemplo
+## Programas de ejemplo
 
 Los programas de ejemplo se encuentran en la carpeta `examples`.
 
