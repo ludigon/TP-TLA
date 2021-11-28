@@ -56,6 +56,7 @@ line_list:
     ;
 block:
     instruction                             {$$ = $1;}
+    | NEW_LINE                              {;}
     ;
 
 instruction:
