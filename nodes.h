@@ -67,6 +67,7 @@ typedef struct if_node {
     int line;
     node_t * expression;
     node_t * block;
+    node_t * else_block;
 } if_node;
 
 typedef struct line_list_node {

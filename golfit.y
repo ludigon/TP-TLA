@@ -123,11 +123,12 @@ num_exp:
     ;                               
 
 while:
-	WHILE expr WHILE block 			    {$$ = (node_t*)createWhileNode($2, $4);}
+	WHILE expr WHILE block 				    {$$ = (node_t*)createWhileNode($2, $4);}
 	;	
 
 if:
-	expr IF block 						    {$$ = (node_t*)createIfNode($1, $3);}
+	expr IF block 			    			{$$ = (node_t*)createIfNode($1, $3, NULL);}
+	| expr IF block ELSE block 			    {$$ = (node_t*)createIfNode($1, $3, $5);}
 	;	
 
 %%
@@ -150,6 +151,6 @@ int main() {
         cd = cd->next;
     }
     printf("}");
-    printf("TODO OK\n");
+    //printf("TODO OK\n");
 }
 

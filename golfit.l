@@ -16,7 +16,7 @@ variable[a-zA-Z][a-zA-Z0-9]*
 "#"             {return INIT_INT;}
 "^"             {return INIT_STR;}
 "_"             {return PRINT;}
-\"[^\n]*\"      {yylval.str_lit = malloc(strlen(yytext) + 1);
+\"[^\n\"]*\"      {yylval.str_lit = malloc(strlen(yytext) + 1);
                                                 strcpy(yylval.str_lit, yytext);
                                                 return STRING;}
 (0|[1-9][0-9]*) {yylval.number = atoi(yytext); return NUMBER;}

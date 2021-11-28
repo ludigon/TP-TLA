@@ -235,8 +235,15 @@ char * reduceIfNode(node_t * node) {
     if_node * new_node = (if_node*)node;
 	char * expression = exec(new_node->expression);
 	char * block = exec(new_node->block);
-	char * result = malloc(strlen("if () {\n}\n") + strlen(expression) + strlen(block) + 1);
-	sprintf(result, "if (%s) {\n%s}\n", expression, block);
+	char * else_block = new_node->else_block != NULL ? exec(new_node->else_block) : NULL;
+	char * if_format = "if (%s) {\n%s}\n";
+	size_t if_size = strlen(if_format) - 4 + strlen(expression) + strlen(block);
+	char * else_format = "else {\n%s}\n";
+	size_t else_size = else_block != NULL ? strlen(else_format) - 2 + strlen(else_block) : 0;
+	char * result = malloc(if_size + else_size + 1);
+	sprintf(result, if_format, expression, block);
+	if (else_block != NULL)
+		sprintf(result + if_size, else_format, else_block);
 	free(expression);
 	free(block);
 	return result;

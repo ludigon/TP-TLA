@@ -93,12 +93,13 @@ while_node * createWhileNode(node_t * expression, node_t * block) {
     return node;
 }
 
-if_node * createIfNode(node_t * expression, node_t * block) {
+if_node * createIfNode(node_t * expression, node_t * block, node_t * else_block) {
     if_node * node = malloc(sizeof(if_node));
     node->type = IF_NODE;
     node->line = yylineno-1;
     node->expression = expression;
     node->block = block;
+	node->else_block = else_block;
 
     return node;
 }

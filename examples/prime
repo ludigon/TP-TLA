@@ -1,0 +1,10 @@
+#prime=1
+#p=5
+#d=2
+p==1?prime=0
+@d<p & prime@{
+	p%d==0?prime=0
+	d=d+1
+}
+prime?_"true":_"false"
+
