@@ -43,6 +43,7 @@ void yyerror(tree_node **,const char *);
 
 %left OR
 %left AND
+%left IS_EQUAL
 %left LESS_EQUAL_THAN LESS_THAN GREATER_EQUAL_THAN GREATER_THAN
 %left PLUS MINUS
 %left TIMES DIVIDED_BY REMAINDER
@@ -108,6 +109,7 @@ var_exp:
     | var_exp GREATER_EQUAL_THAN var_exp    {$$ = (node_t*)createOperationNode($1, ">=", $3);}
     | var_exp AND var_exp                   {$$ = (node_t*)createOperationNode($1, "&&", $3);}
     | var_exp OR var_exp                    {$$ = (node_t*)createOperationNode($1, "||", $3);}
+    | var_exp IS_EQUAL var_exp              {$$ = (node_t*)createOperationNode($1, "==", $3);}
     | NOT var_exp                           {$$ = (node_t*)createUnaryOperationNode($2, "!");}
     | '(' var_exp ')'                       {$$ = $2;}
     ;
@@ -121,11 +123,11 @@ num_exp:
     ;                               
 
 while:
-	WHILE expr NEW_LINE block 					{$$ = (node_t*)createWhileNode($2, $4);}
+	WHILE expr WHILE block 			    {$$ = (node_t*)createWhileNode($2, $4);}
 	;	
 
 if:
-	expr IF block 						{$$ = (node_t*)createIfNode($1, $3);}
+	expr IF block 						    {$$ = (node_t*)createIfNode($1, $3);}
 	;	
 
 %%

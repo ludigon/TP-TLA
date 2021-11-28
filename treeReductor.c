@@ -491,6 +491,8 @@ char * computeBinaryOperation(int op1, int op2, char * operator) {
         result = op1 && op2;
     } else if (strcmp(operator, "||") == 0){
         result = op1 || op2;
+    } else if (strcmp(operator, "==") == 0) {
+        result = op1 == op2;
     } else {
         printf("ERROR: invalid operator %s", operator);
         exit(1);
