@@ -35,7 +35,7 @@ variable[a-zA-Z][a-zA-Z0-9]*
 "="             {return '=';}
 [\(\)]          {return yytext[0];}
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
-"\n"            {return NEW_LINE;}
+[\n]+           {return NEW_LINE;}
 [ ]             {;}
 .               {yyerror("Syntax Error: Unexpected character\n");}
 %%
