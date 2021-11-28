@@ -21,8 +21,9 @@ char * reducePrintNode(node_t * node);
 char * reduceUnaryOperationNode(node_t * node);
 
 char * get_prefix(var_t var_type);
-char * print_str(string_node *);
+char * print_str(node_t *);
 char * print_int(node_t *);
+char * print_var(variable_node *);
 char * computeBinaryOperation(int op1, int op2, char * operator);
 char * computeUnaryOperation(int op, char * operator);
 int variableExists(char *);
@@ -200,11 +201,12 @@ char * reducePrintNode(node_t * node) {
     }
     switch (new_node->value->type) {
         case STRING_NODE:
-            return print_str((string_node *)new_node->value);
+            return print_str(new_node->value);
         case OPERATION_NODE:
         case CONSTANT_NODE:
-        case VARIABLE_NODE:
             return print_int(new_node->value);
+        case VARIABLE_NODE:
+			return print_var((variable_node *)new_node->value);
 		default:
 			printf("ERROR: Cant print that value.");
     }
@@ -303,7 +305,7 @@ char * get_prefix(var_t var_type) {
     }
 }
 
-char * print_str(string_node * node) {
+char * print_str(node_t * node) {
     char * prefix = "printf(\"\%s\",";
     char * string = exec((node_t*)node);
 
@@ -316,6 +318,20 @@ char * print_str(string_node * node) {
 
 char * print_int(node_t * node) {
     char * prefix = "printf(\"\%d\",";
+    char * string = exec((node_t*)node);
+    char * suffix = ");\n";
+    char * result = malloc(strlen(prefix) + strlen(string) + strlen(suffix) + 10);
+    sprintf(result, "%s%s%s", prefix,string,suffix);
+    free(string);
+    return result;
+}
+
+char * print_var(variable_node * node) {
+    char * prefix;
+	if (getVarType(node->name) == STR_VAR)
+		prefix = "printf(\"\%s\",";
+	else
+		prefix = "printf(\"\%d\",";
     char * string = exec((node_t*)node);
     char * suffix = ");\n";
     char * result = malloc(strlen(prefix) + strlen(string) + strlen(suffix) + 10);
