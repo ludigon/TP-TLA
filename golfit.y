@@ -40,7 +40,7 @@ void yyerror(tree_node **,const char *);
 %type <node> if
 
 %type <tree> line_list
-
+//El orden en el que los declaramos indica la precedencia, siendo el OR el que menos precedencia tiene y el NOT el que mas
 %left OR
 %left AND
 %left IS_EQUAL

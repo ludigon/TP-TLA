@@ -25,6 +25,7 @@ char * reduceWhileNode(node_t * node);
 char * reduceIfNode(node_t * node);
 char * reduceLineListNode(node_t * node);
 char * reduceAssignNode(node_t * node);
+void print_error(char * msg, int line);
 
 char * get_prefix(var_t var_type);
 char * print_str(node_t *);
@@ -66,10 +67,6 @@ char * exec(node_t * root) {
 }
 
 char * reduceInitializeNode(node_t * node) {
-    if (node->type != INITIALIZE_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED INITIALIZE_NODE");
-        exit(1);
-    }
     initialize_node * new_node = (initialize_node*)node;
     char * prefix = get_prefix(new_node->var_type);
     char * name = exec(new_node->var);
@@ -78,19 +75,16 @@ char * reduceInitializeNode(node_t * node) {
     if (new_node->value->type == VARIABLE_NODE) {
         variable_node * var = (variable_node*)new_node->value;
         if (!variableExists(var->name)) {
-            printf("Line %d -> ERROR: Undeclared variable \"%s\"\n", yylineno, var->name);
-            exit(1);
+            print_error("Undeclared variable", node->line);
         }
         if (getVarType(var->name) != new_node->var_type) {
-            yyerror("ERROR: Cannot assign value from one variable type to another\n");
-            exit(1);
+            print_error("Cannot assign value from one variable type to another", new_node->line);
         }
     }
 
     
     if (variableExists(name)) {
-        printf("ERROR: variable %s already exists!", name);
-        exit(1);
+        print_error("Variable already exists", new_node->line);
     } else {
         saveVariable(name, new_node->var_type);
     }
@@ -106,10 +100,6 @@ char * reduceInitializeNode(node_t * node) {
 }
 
 char * reduceVariableNode(node_t * node) {
-    if (node->type != VARIABLE_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED VARIABLE_NODE");
-        exit(1);
-    }
     variable_node * new_node = (variable_node *)node;
     char * result = malloc(strlen(new_node->name) * sizeof(char) + 1);
     strcpy(result, new_node->name);
@@ -117,10 +107,6 @@ char * reduceVariableNode(node_t * node) {
 }
 
 char * reduceConstantNode(node_t * node) {
-    if (node->type != CONSTANT_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED CONSTANT_NODE");
-        exit(1);
-    }
     constant_node * new_node = (constant_node*)node;
     char * result = malloc(MAX_NUM_LEN * sizeof(char) + 1);
     if (new_node->number >= 0) {
@@ -132,11 +118,6 @@ char * reduceConstantNode(node_t * node) {
 }
 
 char * reduceOperationNode(node_t * node) {
-    //Chequeamos que sea del tipo
-    if (node->type != OPERATION_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED OPERATION_NODE");
-        exit(1);
-    }
     //Casteo
     operation_node * new_node = (operation_node*)node;
     // flags que me indican si los operandos son variables
@@ -154,8 +135,7 @@ char * reduceOperationNode(node_t * node) {
     if (new_node->op2->type == VARIABLE_NODE) {
         variable_node * op2 = (variable_node *)new_node->op2;
         if (!variableExists(op2->name)) {
-            printf("ERROR: Undeclared variable \"%s\"", op2->name);
-            exit(1);
+            print_error("Undeclared variable", node->line);
         }
         var2 = 1;
     }
@@ -166,8 +146,7 @@ char * reduceOperationNode(node_t * node) {
         var_t var1_type = getVarType(var1->name);
         var_t var2_type = getVarType(var1->name);
         if (var1_type != var2_type) {
-            printf("ERROR: Variable types must be the  same when operating!");
-            exit(1);
+            print_error("Variable types must be the same!", node->line);
         }
     }
 
@@ -189,10 +168,6 @@ char * reduceOperationNode(node_t * node) {
 }
 
 char * reduceStringNode(node_t * node) {
-    if (node->type != STRING_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED STRING_NODE");
-        exit(1);
-    }
     string_node * new_node = (string_node*)node;
     char * result = malloc(strlen(new_node->str) * sizeof(char) + 1);
     strcpy(result, new_node->str);
@@ -200,14 +175,9 @@ char * reduceStringNode(node_t * node) {
 }
 
 char * reducePrintNode(node_t * node) {
-    if (node->type != PRINT_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED PRINT_NODE");
-        exit(1);
-    }
     print_node * new_node = (print_node*)node;
     if (new_node->value == NULL) {
-        printf("ERROR: Empty \"print\" statement");
-        exit(1);
+        print_error("Cannot print empty statement", node->line);
     }
     switch (new_node->value->type) {
         case STRING_NODE:
@@ -218,16 +188,12 @@ char * reducePrintNode(node_t * node) {
         case VARIABLE_NODE:
 			return print_var((variable_node *)new_node->value);
 		default:
-			printf("ERROR: Cant print that value.");
+			print_error("Unable to print", node->line);
     }
     return NULL;
 }
 
 char * reduceUnaryOperationNode(node_t * node) {
-    if (node->type != UNARY_OPERATION_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED UNARY_OPERATION_NODE");
-        exit(1);
-    }
     unary_operation_node * new_node = (unary_operation_node*)node;
     //Si es una variable, me fijo que exista
 
@@ -235,13 +201,11 @@ char * reduceUnaryOperationNode(node_t * node) {
     if (new_node->op->type == VARIABLE_NODE) {
         variable_node * op = (variable_node *)new_node->op;
         if (!variableExists(op->name)) {
-            printf("ERROR: Undeclared variable \"%s\"", op->name);
-            exit(1);
+            print_error("Undeclared variable", node->line);
         }
         //Si existe, me fijo que sea de tipo int
         if (!(getVarType(op->name) == INT_VAR)) {
-            printf("ERROR: Invalid operation for variable type");
-            exit(1);
+            print_error("Invalid operation for variable type", node->line);
         }
     }
     //Si es una constante, me fijo el invertirla y devolverla su valor calculado
@@ -257,10 +221,6 @@ char * reduceUnaryOperationNode(node_t * node) {
 }
 
 char * reduceWhileNode(node_t * node) {
-    if (node->type != WHILE_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED WHILE_NODE");
-        exit(1);
-    }
     while_node * new_node = (while_node*)node;
 	char * expression = exec(new_node->expression);
 	char * block = exec(new_node->block);
@@ -272,10 +232,6 @@ char * reduceWhileNode(node_t * node) {
 }
 
 char * reduceIfNode(node_t * node) {
-    if (node->type != IF_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED IF_NODE");
-        exit(1);
-    }
     if_node * new_node = (if_node*)node;
 	char * expression = exec(new_node->expression);
 	char * block = exec(new_node->block);
@@ -287,12 +243,7 @@ char * reduceIfNode(node_t * node) {
 }
 
 char * reduceLineListNode(node_t * node) {
-	if (node->type != LINE_LIST_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED LINE_LIST_NODE");
-        exit(1);
-	}
-	
-    line_list_node * new_node = (line_list_node*)node;
+	line_list_node * new_node = (line_list_node*)node;
 	tree_node *n = new_node->root;
 	size_t capacity = 16;
 	size_t size = 0;
@@ -316,43 +267,37 @@ char * reduceLineListNode(node_t * node) {
 }
 
 char * reduceAssignNode(node_t * node) {
-    if (node->type != ASSIGN_NODE) {
-        printf("ERROR: INCORRECT NODE TYPE. EXPECTED ASSIGN_NODE");
-        exit(1);
-	}
     assign_node * new_node = (assign_node*)node;
     //Chequeo si existe la variable
     variable_node * var_node = (variable_node*)new_node->var;
     if (!variableExists(var_node->name)) {
-        printf("ERROR: Undeclared variable \"%s\"", var_node->name);
-        exit(1);
+        print_error("Undeclared variable", node->line);
     }
     //Una vez que se eso me fijo si lo que esta del lado derecho es:
-    //1) un VARIABLE_NODE -> chequeo que sean del mismo tipo
+    //1) un VARIABLE_NODE -> chequeo que exista y que sean del mismo tipo
     //2) un STRING_NODE -> chequeo que la variable del lado izquierdo sea una STR_VAR
     //3) un CONSTANT_NODE, OPERATION_NODE o UNARY_OPERATION_NODE -> cheque que el tipo de la variable sea INT_VAR
     node_type right_type = new_node->right_side->type;
     
     if (new_node->right_side->type == VARIABLE_NODE) {
         variable_node * right_var = (variable_node*)new_node->right_side;
+        if (!variableExists(right_var->name)) {
+            print_error("Undeclared Variable", node->line);
+        }
         if (getVarType(var_node->name) != getVarType(right_var->name)) {
-            printf("ERROR: Can't assign a variable to another of different type");
-            exit(1);
+            print_error("Can't assign a variable to another of different type", node->line);
         }
     } else if (new_node->right_side->type == STRING_NODE) {
         string_node * right_str = (string_node*)new_node->right_side;
         if (getVarType(var_node->name) != STR_VAR) {
-            printf("ERROR: Can't assign a string to a int variable");
-            exit(1);
+            print_error(" Can't assign a string to a int variable", node->line);
         }
     } else if (new_node->right_side->type == CONSTANT_NODE || new_node->right_side->type == OPERATION_NODE || new_node->right_side->type == UNARY_OPERATION_NODE) {
         if (getVarType(var_node->name) != INT_VAR) {
-            printf("ERROR: Can't assign int value to string variable");
-            exit(1);
+            print_error("Can't assign int value to string variable", node->line);
         }
     } else {
-        printf("ERROR: Unexpected Node Type on assignation");
-        exit(1);
+        print_error("Unexpected type on assignation", node->line);
     } 
     //Una vez que esta todo chequeado, creo el string de asignacion
     char * var_string = exec(new_node->var);
@@ -373,8 +318,7 @@ int variableExists(char * name) {
         }
     }
     if (!found && i == MAX_VARIABLES) {
-        printf("ERROR: max number of variables reached! (%d)", MAX_VARIABLES);
-        exit(1);
+        print_error("Max number of variables reached!", -1);
     }
     return found;
 }
@@ -385,8 +329,7 @@ void saveVariable(char * name, var_t var_type) {
         i++;
     }
     if (i == MAX_VARIABLES) {
-        printf("ERROR: max number of variables reached! (%d)", MAX_VARIABLES);
-        exit(1);
+        print_error("Max number of variables reached!", -1);
     }
     variables[i] = malloc(sizeof(var_record));
     variables[i]->name = malloc(strlen(name) * sizeof(char) + 1);
@@ -403,7 +346,7 @@ var_t getVarType(char * name) {
         }
         i++;
     }
-    printf("ERROR: Can't get type of undeclared variable\n");
+    print_error("Can't get type of undeclared variable", -1);
     exit(1);
 }
 
@@ -417,8 +360,6 @@ char * get_prefix(var_t var_type) {
         return "char *";
         break;
     default:
-        printf("ERROR: Unknown var_type %d", var_type);
-        exit(1);
         break;
     }
 }
@@ -469,14 +410,12 @@ char * computeBinaryOperation(int op1, int op2, char * operator) {
         result = op1 * op2;
     } else if (strcmp(operator, "/") == 0){
         if (op2 == 0) {
-            printf("ERROR: Cannot divide by 0");
-            exit(1);
+            print_error("Division by zero", -1);
         }
         result = op1 / op2;
     } else if (strcmp(operator, "\%") == 0){
         if (op2 == 0) {
-            printf("ERROR: Cannot divide by 0");
-            exit(1);
+            print_error("Division by zero", -1);
         }
         result = op1 % op2;
     } else if (strcmp(operator, ">") == 0){
@@ -494,8 +433,7 @@ char * computeBinaryOperation(int op1, int op2, char * operator) {
     } else if (strcmp(operator, "==") == 0) {
         result = op1 == op2;
     } else {
-        printf("ERROR: invalid operator %s", operator);
-        exit(1);
+        print_error("Invalid Operator", -1);
     }
     sprintf(answer, "%d", result);
     return answer;
@@ -507,9 +445,13 @@ char * computeUnaryOperation(int op, char * operator) {
     if (strcmp(operator, "!") == 0) {
         result = !op;
     } else {
-        printf("ERROR: invalid unary operator %s", operator);
-        exit(1);
+        print_error("Invalid Unary operator", -1);
     }
     sprintf(answer, "%d", result);
     return answer;
+}
+
+void print_error(char * msg, int line) {
+    fprintf(stderr, "ERROR: Line %d. %s\n", line, msg);
+    exit(1);
 }

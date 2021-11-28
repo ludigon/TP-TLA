@@ -16,5 +16,6 @@ typedef enum {
 
 typedef struct nodeT{
     node_type type;
+    int line;
 } node_t;
 
