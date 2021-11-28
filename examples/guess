@@ -1,0 +1,12 @@
+#number=6
+#leave=0
+@!leave@{
+	_"Adivine el numero entre 1-10: "
+	#guess
+	~guess
+	guess==number?{
+		_"Correcto!\n"
+		leave=1
+	}:_"Incorrecto!\n"
+}
+
