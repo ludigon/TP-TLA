@@ -1,24 +1,12 @@
 #ifndef NODES_H
 #define NODES_H
-
-typedef enum {
-  CONSTANT_NODE = 0,
-  VARIABLE_NODE,
-  INITIALIZE_NODE,
-  OPERATION_NODE,
-  STRING_NODE,
-  PRINT_NODE,
-  UNARY_OPERATION_NODE
-} node_type;
+#include "node_t.h"
+#include "tree_node.h"
 
 typedef enum {
   INT_VAR = 1,
   STR_VAR
 } var_t;
-
-typedef struct nodeT{
-    node_type type;
-} node_t;
 
 typedef struct constantNode {
     node_type type;
@@ -59,5 +47,22 @@ typedef struct unary_operation_node {
     node_t * op;
     char * operator;
 } unary_operation_node;
+
+typedef struct while_node {
+    node_type type;
+    node_t * expression;
+    node_t * block;
+} while_node;
+
+typedef struct if_node {
+    node_type type;
+    node_t * expression;
+    node_t * block;
+} if_node;
+
+typedef struct line_list_node {
+    node_type type;
+    tree_node * root;
+} line_list_node;
 
 #endif

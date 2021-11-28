@@ -22,7 +22,7 @@ void yyerror(tree_node **,const char *);
 %token <str> VARIABLE
 %token <str_lit> STRING
 %token <number> NUMBER
-%token <str> PLUS MINUS TIMES DIVIDED_BY REMAINDER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN AND OR NOT
+%token <str> PLUS MINUS TIMES DIVIDED_BY REMAINDER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN AND OR NOT IF ELSE WHILE
 
 
 %type <node> block
@@ -35,6 +35,8 @@ void yyerror(tree_node **,const char *);
 %type <node> initialization
 %type <node> declaration
 %type <node> print_statement
+%type <node> while
+%type <node> if
 
 %type <tree> line_list
 
@@ -57,6 +59,9 @@ line_list:
     ;
 block:
     instruction                             {$$ = $1;}
+	| while									{$$ = $1;}
+	| if									{$$ = $1;}
+	| '{' NEW_LINE line_list NEW_LINE '}' 	{$$ = (node_t*)createLineListNode($3);}
     ;
 
 instruction:
@@ -108,6 +113,13 @@ num_exp:
     | MINUS NUMBER                          {$$ = (node_t*)createConstantNode($2 * -1);}
     ;                               
 
+while:
+	WHILE expr block 					{$$ = (node_t*)createWhileNode($2, $3);}
+	;	
+
+if:
+	expr IF block 						{$$ = (node_t*)createIfNode($1, $3);}
+	;	
 
 %%
 void yyerror(tree_node ** code,const char * msg) {
@@ -121,7 +133,11 @@ int main() {
     printf("#include <stdlib.h>\n#include<stdio.h>\n");
     printf("int main() {\n");
     while(cd != NULL) {
-        printf("%s\n", exec(cd->root));
+		char * node = exec(cd->root);
+		if (node != NULL) {
+			printf("%s\n", node);
+			free(node);
+		}
         cd = cd->next;
     }
     printf("}");

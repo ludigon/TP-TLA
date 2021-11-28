@@ -31,11 +31,16 @@ variable[a-zA-Z][a-zA-Z0-9]*
 "%"             {return REMAINDER;}
 "!"             {return NOT;}
 "&"             {return AND;}
+"?"             {return IF;}
+":"             {return ELSE;}
+"@"             {return WHILE;}
 "|"             {printf("ENCONTRE UN NOT"); return OR;}
 "="             {return '=';}
+"{"             {return '{';}
+"}"             {return '}';}
 [\(\)]          {return yytext[0];}
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
 [\n]+           {return NEW_LINE;}
-[ ]             {;}
+[ \t]             {;}
 .               {yyerror("Syntax Error: Unexpected character\n");}
 %%

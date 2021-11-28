@@ -4,6 +4,13 @@
 #include "nodes.h"
 #include "nodeGen.h"
 
+line_list_node * createLineListNode(tree_node * root) {
+	line_list_node * node = malloc(sizeof(line_list_node));
+	node->type = LINE_LIST_NODE;
+	node->root = root;
+	return node;
+}
+
 initialize_node * createInitializeNode(node_t * var, node_t * value, var_t var_type) {
     initialize_node * node = malloc(sizeof(initialize_node));
     node->type = INITIALIZE_NODE;
@@ -57,6 +64,22 @@ unary_operation_node * createUnaryOperationNode(node_t * op, char * operator) {
     node->type = UNARY_OPERATION_NODE;
     node->op = op;
     node->operator = operator;
+    return node;
+}
+
+while_node * createWhileNode(node_t * expression, node_t * block) {
+    while_node * node = malloc(sizeof(while_node));
+    node->type = WHILE_NODE;
+    node->expression = expression;
+    node->block = block;
+    return node;
+}
+
+if_node * createIfNode(node_t * expression, node_t * block) {
+    if_node * node = malloc(sizeof(if_node));
+    node->type = IF_NODE;
+    node->expression = expression;
+    node->block = block;
     return node;
 }
 

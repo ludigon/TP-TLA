@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "nodeGen.h"
+#include "node_t.h"
 #include "nodes.h"
 #include "treeReductor.h"
+#include "tree_node.h"
 
 #define MAX_NUM_LEN 25
 #define MAX_VARIABLES 200
@@ -19,6 +21,9 @@ char * reduceOperationNode(node_t * node);
 char * reduceStringNode(node_t * node);
 char * reducePrintNode(node_t * node);
 char * reduceUnaryOperationNode(node_t * node);
+char * reduceWhileNode(node_t * node);
+char * reduceIfNode(node_t * node);
+char * reduceLineListNode(node_t * node);
 
 char * get_prefix(var_t var_type);
 char * print_str(node_t *);
@@ -37,7 +42,10 @@ static reduceFunction reducers[] = {
     reduceOperationNode,
     reduceStringNode,
     reducePrintNode,
-    reduceUnaryOperationNode
+    reduceUnaryOperationNode,
+	reduceWhileNode,
+	reduceIfNode,
+	reduceLineListNode
 };
 
 static var_record * variables[MAX_VARIABLES];
@@ -244,6 +252,65 @@ char * reduceUnaryOperationNode(node_t * node) {
     sprintf(result, "%s(%s)", new_node->operator, operand);
     free(operand);
     return result;
+}
+
+char * reduceWhileNode(node_t * node) {
+    if (node->type != WHILE_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED WHILE_NODE");
+        exit(1);
+    }
+    while_node * new_node = (while_node*)node;
+	char * expression = exec(new_node->expression);
+	char * block = exec(new_node->block);
+	char * result = malloc(strlen("while () {\n}\n") + strlen(expression) + strlen(block) + 1);
+	sprintf(result, "while (%s) {\n%s}\n", expression, block);
+	free(expression);
+	free(block);
+	return result;
+}
+
+char * reduceIfNode(node_t * node) {
+    if (node->type != IF_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED IF_NODE");
+        exit(1);
+    }
+    if_node * new_node = (if_node*)node;
+	char * expression = exec(new_node->expression);
+	char * block = exec(new_node->block);
+	char * result = malloc(strlen("if () {\n}\n") + strlen(expression) + strlen(block) + 1);
+	sprintf(result, "if (%s) {\n%s}\n", expression, block);
+	free(expression);
+	free(block);
+	return result;
+}
+
+char * reduceLineListNode(node_t * node) {
+	if (node->type != LINE_LIST_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED LINE_LIST_NODE");
+        exit(1);
+	}
+	
+    line_list_node * new_node = (line_list_node*)node;
+	tree_node *n = new_node->root;
+	size_t capacity = 16;
+	size_t size = 0;
+	char * result = malloc(capacity);
+	while (n != NULL) {
+		char * line = exec(n->root);
+		size_t line_length = strlen(line);
+
+		while (size + line_length + 1 >= capacity) {
+			result = realloc(result, capacity *= 2);
+		}
+
+		strcpy(result + size, line);
+		free(line);
+
+		size += line_length;
+
+		n = n->next;
+	}
+	return result;
 }
 
 int variableExists(char * name) {
