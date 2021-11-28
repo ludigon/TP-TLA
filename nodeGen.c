@@ -52,6 +52,14 @@ print_node * createPrintNode(node_t * value) {
     return node;
 }
 
+unary_operation_node * createUnaryOperationNode(node_t * op, char * operator) {
+    unary_operation_node * node = malloc(sizeof(unary_operation_node));
+    node->type = UNARY_OPERATION_NODE;
+    node->op = op;
+    node->operator = operator;
+    return node;
+}
+
 tree_node * generateTree(node_t * root) {
     tree_node * tree = malloc(sizeof(node_t));
     tree->root = root;

@@ -18,10 +18,12 @@ char * reduceConstantNode(node_t * node);
 char * reduceOperationNode(node_t * node);
 char * reduceStringNode(node_t * node);
 char * reducePrintNode(node_t * node);
+char * reduceUnaryOperationNode(node_t * node);
 
 char * get_prefix(var_t var_type);
 char * print_str(node_t *);
 char * computeBinaryOperation(int op1, int op2, char * operator);
+char * computeUnaryOperation(int op, char * operator);
 int variableExists(char *);
 void saveVariable(char * name, var_t var_type);
 var_t getVarType(char * name);
@@ -32,7 +34,8 @@ static reduceFunction reducers[] = {
     reduceInitializeNode,
     reduceOperationNode,
     reduceStringNode,
-    reducePrintNode
+    reducePrintNode,
+    reduceUnaryOperationNode
 };
 
 static var_record * variables[MAX_VARIABLES];
@@ -108,7 +111,11 @@ char * reduceConstantNode(node_t * node) {
     }
     constant_node * new_node = (constant_node*)node;
     char * result = malloc(MAX_NUM_LEN * sizeof(char));
-    sprintf(result, "%d", new_node->number);
+    if (new_node->number >= 0) {
+        sprintf(result, "%d", new_node->number);
+    } else {
+        sprintf(result, "(%d)", new_node->number);
+    }
     return result;
 }
 
@@ -118,10 +125,8 @@ char * reduceOperationNode(node_t * node) {
         printf("ERROR: INCORRECT NODE TYPE. EXPECTED OPERATION_NODE");
         exit(1);
     }
-    //Casteo y obtengo los strings de cada caso
+    //Casteo
     operation_node * new_node = (operation_node*)node;
-    char * first = exec(new_node->op1);
-    char * second = exec(new_node->op2);
     // flags que me indican si los operandos son variables
     int var1 = 0;
     int var2 = 0;
@@ -161,11 +166,13 @@ char * reduceOperationNode(node_t * node) {
         constant_node * node2 = (constant_node*)new_node->op2;
         result = computeBinaryOperation(node1->number, node2->number, new_node->operator);
     } else {
+        char * first = exec(new_node->op1);
+        char * second = exec(new_node->op2);
         result = malloc((strlen(first) + 3 + strlen(second) + strlen(new_node->operator))*sizeof(char));
         sprintf(result, "(%s%s%s)", first, new_node->operator, second);
+        free(first);
+        free(second);
     }
-    free(first);
-    free(second);
     return(result);
 }
 
@@ -195,6 +202,39 @@ char * reducePrintNode(node_t * node) {
             return print_str(new_node->value);
     }
     return NULL;
+}
+
+char * reduceUnaryOperationNode(node_t * node) {
+    if (node->type != UNARY_OPERATION_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED UNARY_OPERATION_NODE");
+        exit(1);
+    }
+    unary_operation_node * new_node = (unary_operation_node*)node;
+    //Si es una variable, me fijo que exista
+
+    
+    if (new_node->op->type == VARIABLE_NODE) {
+        variable_node * op = (variable_node *)new_node->op;
+        if (!variableExists(op->name)) {
+            printf("ERROR: Undeclared variable \"%s\"", op->name);
+            exit(1);
+        }
+        //Si existe, me fijo que sea de tipo int
+        if (!(getVarType(op->name) == INT_VAR)) {
+            printf("ERROR: Invalid operation for variable type");
+            exit(1);
+        }
+    }
+    //Si es una constante, me fijo el invertirla y devolverla su valor calculado
+    else if (new_node->op->type == CONSTANT_NODE) {
+        constant_node * op = (constant_node*)new_node->op;
+        return computeUnaryOperation(op->number, new_node->operator);
+    }
+    char * operand = exec(new_node->op);
+    char * result = malloc((strlen(new_node->operator) + strlen(operand) + 3) * sizeof(char));
+    sprintf(result, "%s(%s)", new_node->operator, operand);
+    free(operand);
+    return result;
 }
 
 int variableExists(char * name) {
@@ -234,6 +274,7 @@ var_t getVarType(char * name) {
         if (strcmp(name, variables[i]->name) == 0) {
             return variables[i]->var_type;
         }
+        i++;
     }
     printf("ERROR: Can't get type of undeclared variable\n");
     exit(1);
@@ -297,8 +338,25 @@ char * computeBinaryOperation(int op1, int op2, char * operator) {
         result = op1 < op2;
     } else if (strcmp(operator, "<=") == 0){
         result = op1 <= op2;
+    } else if (strcmp(operator, "&&") == 0){
+        result = op1 && op2;
+    } else if (strcmp(operator, "||") == 0){
+        result = op1 || op2;
     } else {
         printf("ERROR: invalid operator %s", operator);
+        exit(1);
+    }
+    sprintf(answer, "%d", result);
+    return answer;
+}
+
+char * computeUnaryOperation(int op, char * operator) {
+    char * answer = malloc(MAX_NUM_LEN);
+    int result;
+    if (strcmp(operator, "!") == 0) {
+        result = !op;
+    } else {
+        printf("ERROR: invalid unary operator %s", operator);
         exit(1);
     }
     sprintf(answer, "%d", result);

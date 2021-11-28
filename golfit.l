@@ -19,8 +19,7 @@ variable[a-zA-Z][a-zA-Z0-9]*
 \"[a-zA-Z0-9 \t\_\#\=\+\-\*\/\%]*\"        {  yylval.str_lit = malloc(strlen(yytext) + 1);
                                                 strcpy(yylval.str_lit, yytext);
                                                 return STRING;}
-[1-9][0-9]*  {yylval.number = atoi(yytext); return NUMBER;}
-"="             {return '=';}
+(0|[1-9][0-9]*) {yylval.number = atoi(yytext); return NUMBER;}
 "+"             {return PLUS;}
 "-"             {return MINUS;}
 "*"             {return TIMES;}
@@ -30,6 +29,10 @@ variable[a-zA-Z][a-zA-Z0-9]*
 ">"             {return GREATER_THAN;}
 ">="            {return GREATER_EQUAL_THAN;}
 "%"             {return REMAINDER;}
+"!"             {return NOT;}
+"&"             {return AND;}
+"|"             {printf("ENCONTRE UN NOT"); return OR;}
+"="             {return '=';}
 [\(\)]          {return yytext[0];}
 {variable}      {strcpy(yylval.str, yytext); return VARIABLE;}
 "\n"            {return NEW_LINE;}

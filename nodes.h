@@ -7,7 +7,8 @@ typedef enum {
   INITIALIZE_NODE,
   OPERATION_NODE,
   STRING_NODE,
-  PRINT_NODE
+  PRINT_NODE,
+  UNARY_OPERATION_NODE
 } node_type;
 
 typedef enum {
@@ -53,6 +54,10 @@ typedef struct print_node {
     node_t * value;
 } print_node;
 
-
+typedef struct unary_operation_node {
+    node_type type;
+    node_t * op;
+    char * operator;
+} unary_operation_node;
 
 #endif

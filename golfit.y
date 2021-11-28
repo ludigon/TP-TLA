@@ -22,7 +22,7 @@ void yyerror(tree_node **,const char *);
 %token <str> VARIABLE
 %token <str_lit> STRING
 %token <number> NUMBER
-%token <str> PLUS MINUS TIMES DIVIDED_BY REMAINDER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN
+%token <str> PLUS MINUS TIMES DIVIDED_BY REMAINDER LESS_THAN LESS_EQUAL_THAN GREATER_THAN GREATER_EQUAL_THAN AND OR NOT
 
 
 %type <node> block
@@ -38,12 +38,16 @@ void yyerror(tree_node **,const char *);
 
 %type <tree> line_list
 
+%left OR
+%left AND
 %left LESS_EQUAL_THAN LESS_THAN GREATER_EQUAL_THAN GREATER_THAN
 %left PLUS MINUS
 %left TIMES DIVIDED_BY REMAINDER
+%right NOT
 
 %start line_list
 %parse-param {tree_node ** code}
+%define parse.error verbose
 
 %%
 line_list:
@@ -89,6 +93,9 @@ var_exp:
     | var_exp LESS_EQUAL_THAN var_exp       {$$ = (node_t*)createOperationNode($1, "<=", $3);}
     | var_exp GREATER_THAN var_exp          {$$ = (node_t*)createOperationNode($1, ">", $3);}
     | var_exp GREATER_EQUAL_THAN var_exp    {$$ = (node_t*)createOperationNode($1, ">=", $3);}
+    | var_exp AND var_exp                   {$$ = (node_t*)createOperationNode($1, "&&", $3);}
+    | var_exp OR var_exp                    {$$ = (node_t*)createOperationNode($1, "||", $3);}
+    | NOT var_exp                           {$$ = (node_t*)createUnaryOperationNode($2, "!");}
     | '(' var_exp ')'                       {$$ = $2;}
     ;
 str_exp:
@@ -110,10 +117,13 @@ void yyerror(tree_node ** code,const char * msg) {
 int main() {
     tree_node * cd;
     yyparse(&cd);
+    printf("#include <stdlib.h>\n#include<stdio.h>\n");
+    printf("int main() {\n");
     while(cd != NULL) {
         printf("%s\n", exec(cd->root));
         cd = cd->next;
     }
+    printf("}");
     printf("TODO OK\n");
 }
 
