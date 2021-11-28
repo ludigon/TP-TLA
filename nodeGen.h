@@ -13,6 +13,7 @@ print_node * createPrintNode(node_t * value);
 unary_operation_node * createUnaryOperationNode(node_t * op, char * operator);
 while_node * createWhileNode(node_t * expression, node_t * block);
 if_node * createIfNode(node_t * expression, node_t * block);
+assign_node * createAssignNode(node_t * var, node_t * right_side);
 
 tree_node * generateTree(node_t * root);
 tree_node * addTree(tree_node * current, node_t * root);

@@ -33,6 +33,7 @@ void yyerror(tree_node **,const char *);
 %type <node> single_var
 %type <node> instruction
 %type <node> initialization
+%type <node> assignation
 %type <node> declaration
 %type <node> print_statement
 %type <node> while
@@ -68,6 +69,7 @@ instruction:
     initialization                          {$$ = $1;}
     | declaration                           {$$ = $1;}
     | print_statement                       {$$ = $1;}
+    | assignation                           {$$ = $1;}
     ;
 
 print_statement:
@@ -85,6 +87,11 @@ initialization:
 declaration:
     INIT_INT single_var                     {$$ = (node_t*)createInitializeNode($2, (node_t*)createConstantNode(0), INT_VAR);}
     ;
+assignation:
+    single_var '=' var_exp                  {$$ = (node_t*)createAssignNode($1, $3);}
+    | single_var '=' str_exp                {$$ = (node_t*)createAssignNode($1, $3);}
+    ;
+
 single_var:
     VARIABLE                                {$$ = (node_t*)createVariableNode($1);}
 var_exp:
@@ -130,7 +137,7 @@ void yyerror(tree_node ** code,const char * msg) {
 int main() {
     tree_node * cd;
     yyparse(&cd);
-    printf("#include <stdlib.h>\n#include<stdio.h>\n");
+    printf("#include <stdlib.h>\n#include <stdio.h>\n");
     printf("int main() {\n");
     while(cd != NULL) {
 		char * node = exec(cd->root);

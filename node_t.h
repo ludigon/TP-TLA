@@ -10,7 +10,8 @@ typedef enum {
   UNARY_OPERATION_NODE,
   WHILE_NODE,
   IF_NODE,
-  LINE_LIST_NODE
+  LINE_LIST_NODE,
+  ASSIGN_NODE
 } node_type;
 
 typedef struct nodeT{

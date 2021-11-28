@@ -83,6 +83,14 @@ if_node * createIfNode(node_t * expression, node_t * block) {
     return node;
 }
 
+assign_node * createAssignNode(node_t * var, node_t * right_side) {
+    assign_node * node = malloc(sizeof(assign_node));
+    node->type = ASSIGN_NODE;
+    node->var = var;
+    node->right_side = right_side;
+    return node;
+}
+
 tree_node * generateTree(node_t * root) {
     tree_node * tree = malloc(sizeof(tree_node));
     tree->root = root;

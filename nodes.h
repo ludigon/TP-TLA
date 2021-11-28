@@ -65,4 +65,10 @@ typedef struct line_list_node {
     tree_node * root;
 } line_list_node;
 
+typedef struct assign_node {
+    node_type type;
+    node_t * var;
+    node_t * right_side;
+} assign_node;
+
 #endif

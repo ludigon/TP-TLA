@@ -24,6 +24,7 @@ char * reduceUnaryOperationNode(node_t * node);
 char * reduceWhileNode(node_t * node);
 char * reduceIfNode(node_t * node);
 char * reduceLineListNode(node_t * node);
+char * reduceAssignNode(node_t * node);
 
 char * get_prefix(var_t var_type);
 char * print_str(node_t *);
@@ -45,7 +46,8 @@ static reduceFunction reducers[] = {
     reduceUnaryOperationNode,
 	reduceWhileNode,
 	reduceIfNode,
-	reduceLineListNode
+	reduceLineListNode,
+    reduceAssignNode
 };
 
 static var_record * variables[MAX_VARIABLES];
@@ -313,6 +315,55 @@ char * reduceLineListNode(node_t * node) {
 	return result;
 }
 
+char * reduceAssignNode(node_t * node) {
+    if (node->type != ASSIGN_NODE) {
+        printf("ERROR: INCORRECT NODE TYPE. EXPECTED ASSIGN_NODE");
+        exit(1);
+	}
+    assign_node * new_node = (assign_node*)node;
+    //Chequeo si existe la variable
+    variable_node * var_node = (variable_node*)new_node->var;
+    if (!variableExists(var_node->name)) {
+        printf("ERROR: Undeclared variable \"%s\"", var_node->name);
+        exit(1);
+    }
+    //Una vez que se eso me fijo si lo que esta del lado derecho es:
+    //1) un VARIABLE_NODE -> chequeo que sean del mismo tipo
+    //2) un STRING_NODE -> chequeo que la variable del lado izquierdo sea una STR_VAR
+    //3) un CONSTANT_NODE, OPERATION_NODE o UNARY_OPERATION_NODE -> cheque que el tipo de la variable sea INT_VAR
+    node_type right_type = new_node->right_side->type;
+    
+    if (new_node->right_side->type == VARIABLE_NODE) {
+        variable_node * right_var = (variable_node*)new_node->right_side;
+        if (getVarType(var_node->name) != getVarType(right_var->name)) {
+            printf("ERROR: Can't assign a variable to another of different type");
+            exit(1);
+        }
+    } else if (new_node->right_side->type == STRING_NODE) {
+        string_node * right_str = (string_node*)new_node->right_side;
+        if (getVarType(var_node->name) != STR_VAR) {
+            printf("ERROR: Can't assign a string to a int variable");
+            exit(1);
+        }
+    } else if (new_node->right_side->type == CONSTANT_NODE || new_node->right_side->type == OPERATION_NODE || new_node->right_side->type == UNARY_OPERATION_NODE) {
+        if (getVarType(var_node->name) != INT_VAR) {
+            printf("ERROR: Can't assign int value to string variable");
+            exit(1);
+        }
+    } else {
+        printf("ERROR: Unexpected Node Type on assignation");
+        exit(1);
+    } 
+    //Una vez que esta todo chequeado, creo el string de asignacion
+    char * var_string = exec(new_node->var);
+    char * right_string = exec(new_node->right_side);
+    char * result = malloc((strlen(var_string) + strlen(right_string) + 4) * sizeof(char));
+    sprintf(result, "%s=%s;\n", var_string, right_string);
+    free(var_string);
+    free(right_string);
+    return result;
+}
+
 int variableExists(char * name) {
     int found = 0;
     int i;
@@ -322,7 +373,7 @@ int variableExists(char * name) {
         }
     }
     if (!found && i == MAX_VARIABLES) {
-        printf("ERROR: max number of variables ASD reached! (%d)", MAX_VARIABLES);
+        printf("ERROR: max number of variables reached! (%d)", MAX_VARIABLES);
         exit(1);
     }
     return found;
@@ -407,7 +458,6 @@ char * print_var(variable_node * node) {
     return result;
 }
 
-//Esto puede mejorar
 char * computeBinaryOperation(int op1, int op2, char * operator) {
     char * answer = malloc(MAX_NUM_LEN);
     int result;
