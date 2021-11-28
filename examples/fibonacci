@@ -1,0 +1,15 @@
+#a=0
+#b=1
+_"Ingrese la cantidad de numeros: "
+#count
+~count
+#i=0
+@i<count@{
+	#t=b
+	b=a+b
+	a=t
+	_a
+	_" "
+	i=i+1
+}
+
