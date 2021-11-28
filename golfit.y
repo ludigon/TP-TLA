@@ -55,7 +55,6 @@ void yyerror(tree_node **,const char *);
 
 %start line_list
 %parse-param {tree_node ** code}
-%define parse.error verbose
 
 %%
 line_list:
@@ -83,7 +82,7 @@ print_statement:
     ;
 
 input_statement:
-    INPUT expr                              {$$ = (node_t*)createInputNode($2);}
+    INPUT single_var                        {$$ = (node_t*)createInputNode($2);}
     ;
 
 expr:
