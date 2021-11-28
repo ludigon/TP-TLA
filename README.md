@@ -92,6 +92,7 @@ a=b+1
 ### Operaciones
 
 Golf-IT soporta las operaciones aritméticas de suma, resta, multiplicación, división y módulo.
+Solo pueden usarse variables numéricas en las operaciones.
 
 ```
 #a=1+1
